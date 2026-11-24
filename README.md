@@ -4,6 +4,48 @@ Self-destructing, end-to-end encrypted notes. Write a note, get a link, and the 
 
 > Inspired by the idea behind burnernote.com. Written from scratch.
 
+![Writing a note](docs/screenshots/01-not-yaz.png)
+
+## Example: sharing a Wi-Fi password
+
+Ayşe wants to send Mehmet the office Wi-Fi password without it sitting in their chat history forever.
+
+**1. Ayşe writes the note.** She opens Ghostnote, types the password, and under *Gelişmiş seçenekler* (advanced options) adds a password (`gizli123`) and picks 3 days.
+
+**2. She gets a one-time link.** She sends the link to Mehmet on WhatsApp, and tells him the password by phone.
+
+![The link is ready](docs/screenshots/02-link-hazir.png)
+
+**3. Mehmet opens the link.** Ghostnote asks for the password first. A wrong password does not destroy the note; after 5 wrong tries it is destroyed.
+
+![Wrong password](docs/screenshots/03-yanlis-sifre.png)
+
+**4. He reads the note.** With the right password, the note is decrypted in his browser and deleted from the server at the same moment.
+
+![The note is open](docs/screenshots/04-not-acildi.png)
+
+**5. The link is now dead.** If anyone opens the link again, even Mehmet, the note is gone. If Mehmet had never opened it, it would have deleted itself after 3 days.
+
+![The note is gone](docs/screenshots/05-not-yok.png)
+
+```mermaid
+sequenceDiagram
+    actor A as Ayşe
+    participant S as Ghostnote server
+    actor M as Mehmet
+    A->>A: Encrypt the note in the browser
+    A->>S: Send only the encrypted note
+    S-->>A: Note ID
+    A->>M: Link: /n/ID#KEY (key never reaches the server)
+    M->>S: Open note ID (with password proof)
+    S-->>M: Encrypted note, then delete it
+    M->>M: Decrypt with KEY from the link
+```
+
+It also works on phones, in light and dark themes:
+
+<img src="docs/screenshots/06-mobil-acik-tema.png" alt="Mobile, light theme" width="300">
+
 ## Run it
 
 Requires Node.js 22.13 or newer. No dependencies to install.
