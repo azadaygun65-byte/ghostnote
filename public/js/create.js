@@ -77,7 +77,8 @@ form.addEventListener('submit', async (event) => {
     linkInput.value = `${location.origin}/n/${data.id}#${sealed.key}`;
     resultInfo.textContent =
       `Bu link bir kez açılabilir. Açılmazsa ${days} gün sonra kendini siler.` +
-      (password ? ' Şifreyi alıcıya ayrı bir yoldan ilet.' : '');
+      (password ? ' Şifreyi alıcıya ayrı bir yoldan ilet.' : '') +
+      (data.tracked ? ' Okunup okunmadığını Notlarım sayfasından takip edebilirsin.' : '');
 
     textarea.value = '';
     passwordInput.value = '';

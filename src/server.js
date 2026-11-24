@@ -5,6 +5,20 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NoteStore } from './store.js';
+import {
+  SESSION_COOKIE,
+  SESSION_DAYS,
+  burnPasswordCheck,
+  clearSessionCookie,
+  hashPassword,
+  hashToken,
+  isValidPassword,
+  newSessionToken,
+  normalizeEmail,
+  parseCookies,
+  sessionCookie,
+  verifyPassword,
+} from './auth.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = path.join(ROOT, 'public');
@@ -48,7 +62,13 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon',
 };
 
-const PAGES = { '/': 'index.html', '/about': 'about.html' };
+const PAGES = {
+  '/': 'index.html',
+  '/about': 'about.html',
+  '/login': 'login.html',
+  '/register': 'register.html',
+  '/notes': 'notes.html',
+};
 
 class HttpError extends Error {
   constructor(status, code) {
@@ -63,10 +83,11 @@ function send(res, status, body, headers = {}) {
   res.end(body);
 }
 
-function sendJson(res, status, data) {
+function sendJson(res, status, data, headers = {}) {
   send(res, status, JSON.stringify(data), {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
+    ...headers,
   });
 }
 
@@ -112,17 +133,120 @@ function hashAuth(authB64, saltB64) {
   return crypto.scryptSync(Buffer.from(authB64, 'base64url'), Buffer.from(saltB64, 'base64url'), 32);
 }
 
+function publicUser(user) {
+  return { email: user.email, createdAt: user.created_at };
+}
+
+function publicReceipt(r) {
+  return {
+    id: r.note_id,
+    status: r.status,
+    hasPassword: r.has_password === 1,
+    createdAt: r.created_at,
+    expiresAt: r.expires_at,
+    closedAt: r.closed_at,
+  };
+}
+
 export function createApp({
   dbFile = ':memory:',
   now = Date.now,
   rateLimit = { windowMs: 60_000, max: 30 },
+  authRateLimit = { windowMs: 15 * 60_000, max: 10 },
+  cookieSecure = process.env.COOKIE_SECURE === '1',
 } = {}) {
   const store = new NoteStore(dbFile, { now });
-  const allow = createRateLimiter(rateLimit, now);
+  const allowNotes = createRateLimiter(rateLimit, now);
+  const allowAuth = createRateLimiter(authRateLimit, now);
+
+  const clientIp = (req) => req.socket.remoteAddress ?? 'unknown';
 
   function checkRate(req) {
-    if (!allow(req.socket.remoteAddress ?? 'unknown')) throw new HttpError(429, 'rate_limited');
+    if (!allowNotes(clientIp(req))) throw new HttpError(429, 'rate_limited');
   }
+
+  function checkAuthRate(req) {
+    if (!allowAuth(clientIp(req))) throw new HttpError(429, 'rate_limited');
+  }
+
+  /**
+   * Blocks cross-site requests that change state. Browsers send Origin on
+   * POST/DELETE; it must match the host we are serving.
+   */
+  function checkOrigin(req) {
+    const origin = req.headers.origin;
+    if (!origin) return;
+    let host;
+    try {
+      host = new URL(origin).host;
+    } catch {
+      throw new HttpError(403, 'bad_origin');
+    }
+    if (host !== req.headers.host) throw new HttpError(403, 'bad_origin');
+  }
+
+  function sessionHash(req) {
+    const token = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+    return token && /^[A-Za-z0-9_-]{43}$/.test(token) ? hashToken(token) : null;
+  }
+
+  function currentUser(req) {
+    const hash = sessionHash(req);
+    return hash ? store.getSessionUser(hash) : null;
+  }
+
+  function requireUser(req) {
+    const user = currentUser(req);
+    if (!user) throw new HttpError(401, 'not_authenticated');
+    return user;
+  }
+
+  function startSession(res, status, user) {
+    const { token, hash } = newSessionToken();
+    store.createSession(hash, user.id, now() + SESSION_DAYS * DAY_MS);
+    sendJson(res, status, { user: publicUser(user) }, {
+      'Set-Cookie': sessionCookie(token, { secure: cookieSecure }),
+    });
+  }
+
+  // ----- Accounts -----
+
+  async function register(req, res) {
+    checkAuthRate(req);
+    const body = await readJson(req);
+    const email = normalizeEmail(body.email);
+    if (!email) throw new HttpError(400, 'invalid_email');
+    if (!isValidPassword(body.password)) throw new HttpError(400, 'invalid_password');
+
+    const id = store.createUser(email, await hashPassword(body.password));
+    if (id === null) throw new HttpError(409, 'email_taken');
+    startSession(res, 201, { id, email, created_at: now() });
+  }
+
+  async function login(req, res) {
+    checkAuthRate(req);
+    const body = await readJson(req);
+    const email = normalizeEmail(body.email);
+    const password = typeof body.password === 'string' ? body.password : '';
+    const user = email ? store.getUserByEmail(email) : null;
+
+    if (!user) {
+      await burnPasswordCheck(password);
+      throw new HttpError(401, 'invalid_credentials');
+    }
+    if (!(await verifyPassword(password, user.password_hash))) {
+      throw new HttpError(401, 'invalid_credentials');
+    }
+    startSession(res, 200, user);
+  }
+
+  function logout(req, res) {
+    const hash = sessionHash(req);
+    if (hash) store.deleteSession(hash);
+    sendJson(res, 200, { ok: true }, { 'Set-Cookie': clearSessionCookie({ secure: cookieSecure }) });
+  }
+
+  // ----- Notes -----
 
   async function createNote(req, res) {
     checkRate(req);
@@ -157,9 +281,17 @@ export function createApp({
       pwVerifier = hashAuth(password.auth, password.salt);
     }
 
+    const owner = currentUser(req);
     const id = crypto.randomBytes(16).toString('base64url');
-    store.create({ id, ciphertext, pwSalt, pwVerifier, expiresAt: now() + expiresInDays * DAY_MS });
-    sendJson(res, 201, { id });
+    store.create({
+      id,
+      ciphertext,
+      pwSalt,
+      pwVerifier,
+      expiresAt: now() + expiresInDays * DAY_MS,
+      ownerId: owner?.id ?? null,
+    });
+    sendJson(res, 201, { id, tracked: owner !== null });
   }
 
   function noteMeta(res, id) {
@@ -187,7 +319,7 @@ export function createApp({
       if (!ok) {
         const attempts = store.failAttempt(id);
         if (attempts >= MAX_PASSWORD_ATTEMPTS) {
-          store.burn(id);
+          store.burn(id, 'destroyed');
           throw new HttpError(410, 'too_many_attempts');
         }
         return sendJson(res, 403, {
@@ -198,23 +330,51 @@ export function createApp({
     }
 
     // Burn before responding: once the ciphertext leaves the server, it is gone.
-    store.burn(id);
+    store.burn(id, 'read');
     sendJson(res, 200, { ciphertext: note.ciphertext });
   }
 
-  async function handleApi(req, res, pathname) {
-    if (pathname === '/api/notes') {
-      if (req.method !== 'POST') throw new HttpError(405, 'method_not_allowed');
-      return createNote(req, res);
-    }
-    if (pathname === '/api/stats') {
-      if (req.method !== 'GET') throw new HttpError(405, 'method_not_allowed');
-      return sendJson(res, 200, { destroyed: store.destroyedCount() });
-    }
+  function listMyNotes(req, res) {
+    const user = requireUser(req);
+    sendJson(res, 200, { notes: store.listReceipts(user.id).map(publicReceipt) });
+  }
 
-    const match = pathname.match(/^\/api\/notes\/([^/]+)(\/open)?$/);
-    if (match) {
-      const [, id, open] = match;
+  function deleteMyNote(req, res, id) {
+    const user = requireUser(req);
+    const receipt = store.getReceipt(id);
+    if (!receipt || receipt.user_id !== user.id) throw new HttpError(404, 'not_found');
+    if (receipt.status !== 'pending' || !store.burn(id, 'deleted')) {
+      throw new HttpError(409, 'not_pending');
+    }
+    sendJson(res, 200, { ok: true });
+  }
+
+  // ----- Routing -----
+
+  const ROUTES = {
+    'POST /api/auth/register': register,
+    'POST /api/auth/login': login,
+    'POST /api/auth/logout': logout,
+    'GET /api/auth/me': (req, res) => {
+      const user = currentUser(req);
+      sendJson(res, 200, { user: user ? publicUser(user) : null });
+    },
+    'GET /api/my/notes': listMyNotes,
+    'POST /api/notes': createNote,
+    'GET /api/stats': (req, res) => sendJson(res, 200, { destroyed: store.destroyedCount() }),
+  };
+  const KNOWN_PATHS = new Set(Object.keys(ROUTES).map((k) => k.split(' ')[1]));
+
+  async function handleApi(req, res, pathname) {
+    if (req.method !== 'GET' && req.method !== 'HEAD') checkOrigin(req);
+
+    const route = ROUTES[`${req.method} ${pathname}`];
+    if (route) return route(req, res);
+    if (KNOWN_PATHS.has(pathname)) throw new HttpError(405, 'method_not_allowed');
+
+    const note = pathname.match(/^\/api\/notes\/([^/]+)(\/open)?$/);
+    if (note) {
+      const [, id, open] = note;
       if (!ID_RE.test(id)) throw new HttpError(404, 'not_found');
       if (open) {
         if (req.method !== 'POST') throw new HttpError(405, 'method_not_allowed');
@@ -223,6 +383,14 @@ export function createApp({
       if (req.method !== 'GET') throw new HttpError(405, 'method_not_allowed');
       return noteMeta(res, id);
     }
+
+    const mine = pathname.match(/^\/api\/my\/notes\/([^/]+)$/);
+    if (mine) {
+      if (req.method !== 'DELETE') throw new HttpError(405, 'method_not_allowed');
+      if (!ID_RE.test(mine[1])) throw new HttpError(404, 'not_found');
+      return deleteMyNote(req, res, mine[1]);
+    }
+
     throw new HttpError(404, 'not_found');
   }
 

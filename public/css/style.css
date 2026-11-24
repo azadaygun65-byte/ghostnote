@@ -115,10 +115,32 @@ code {
   gap: 1rem;
 }
 
-@media (max-width: 420px) {
-  .site-header nav a {
+@media (max-width: 520px) {
+  .site-header nav .nav-about {
     display: none;
   }
+}
+
+/* Auth links in the header */
+
+.auth-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auth-nav:empty {
+  display: none;
+}
+
+.auth-nav .link-button {
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.site-header nav .nav-cta {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .icon-button {
@@ -204,6 +226,7 @@ code {
 textarea,
 input[type='text'],
 input[type='password'],
+input[type='email'],
 select {
   width: 100%;
   font: inherit;
@@ -404,4 +427,174 @@ form > .primary {
 
 .prose li {
   margin-bottom: 0.35rem;
+}
+
+/* Login / register */
+
+.narrow {
+  max-width: 460px;
+}
+
+.narrow .card h1 {
+  font-size: 1.6rem;
+  margin-bottom: 0.3rem;
+}
+
+.narrow .card > .muted {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.field-meta-left {
+  text-align: left;
+}
+
+.auth-switch {
+  text-align: center;
+  margin: 1.25rem 0 0;
+  font-size: 0.95rem;
+}
+
+.auth-note {
+  text-align: center;
+  font-size: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+/* Notlarım */
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.page-head h1 {
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.page-head p {
+  margin: 0.2rem 0 0;
+}
+
+.notes-summary {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.note-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.note-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.note-item-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  grid-column: 1;
+}
+
+.note-dates {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.note-dates dt {
+  color: var(--muted);
+}
+
+.note-dates dt::after {
+  content: ':';
+}
+
+.note-dates dd {
+  margin: 0 0 0 -0.9rem;
+}
+
+.note-item > button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 520px) {
+  .note-item {
+    grid-template-columns: 1fr;
+  }
+
+  .note-item > button {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+}
+
+.note-lock {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.badge-pending {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+}
+
+.badge-read {
+  background: color-mix(in srgb, #22c55e 15%, transparent);
+  color: #16a34a;
+}
+
+[data-theme='dark'] .badge-read {
+  color: #4ade80;
+}
+
+.badge-muted {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.badge-danger {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+
+.danger-button:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.empty {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
 }

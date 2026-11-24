@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Notlarım · Ghostnote</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/theme.js"></script>
+    <script type="module" src="/js/nav.js"></script>
+    <script type="module" src="/js/notes.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">👻</span> Ghostnote</a>
+      <nav>
+        <a class="nav-about" href="/about">Nasıl çalışır?</a>
+        <span id="auth-nav" class="auth-nav"></span>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Temayı değiştir">◐</button>
+      </nav>
+    </header>
+
+    <main class="container">
+      <div class="page-head">
+        <div>
+          <h1>Notlarım</h1>
+          <p class="muted"><span id="account-email"></span></p>
+        </div>
+        <a class="primary as-button" href="/">Yeni not yaz</a>
+      </div>
+
+      <p id="notes-summary" class="muted notes-summary"></p>
+      <p id="notes-loading" class="muted">Yükleniyor…</p>
+
+      <div id="notes-empty" class="card empty" hidden>
+        <h2>Henüz not oluşturmadın</h2>
+        <p class="muted">Giriş yapmışken oluşturduğun notlar burada görünür.</p>
+        <a class="primary as-button" href="/">İlk notunu yaz</a>
+      </div>
+
+      <ul id="notes-list" class="note-list"></ul>
+
+      <p class="auth-note muted">
+        Gizliliğin için notların içeriği ve linkleri burada saklanmaz, sadece durumları görünür.
+      </p>
+    </main>
+  </body>
+</html>

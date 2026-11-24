@@ -7,12 +7,14 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/css/style.css" />
     <script src="/js/theme.js"></script>
+    <script type="module" src="/js/nav.js"></script>
   </head>
   <body>
     <header class="site-header">
       <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">👻</span> Ghostnote</a>
       <nav>
-        <a href="/">Not yaz</a>
+        <a class="nav-about" href="/">Not yaz</a>
+        <span id="auth-nav" class="auth-nav"></span>
         <button id="theme-toggle" class="icon-button" type="button" aria-label="Temayı değiştir">◐</button>
       </nav>
     </header>

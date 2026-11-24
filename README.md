@@ -62,6 +62,7 @@ Environment variables:
 |---|---|---|
 | `PORT` | `3000` | HTTP port |
 | `DB_FILE` | `data/ghostnote.db` | SQLite database file |
+| `COOKIE_SECURE` | unset | Set to `1` in production (HTTPS) to mark the session cookie `Secure` |
 
 ## How it works
 
@@ -83,6 +84,17 @@ If a password is set, PBKDF2-SHA256 (310,000 iterations) turns it into two indep
 
 A wrong password does not burn the note. After 5 wrong attempts, the note is destroyed.
 
+### Accounts (optional)
+
+Anyone can create notes without an account. Signing up adds a **Notlarım** (my notes) page that shows, for each note you created while signed in, whether it is still waiting, was read, expired, was destroyed by wrong passwords, or was deleted by you. You can delete a note that has not been read yet.
+
+The account never stores a note's content, key or link: only its status and dates.
+
+- **Passwords** are hashed with scrypt (random salt per user). A failed login takes the same time and returns the same error whether or not the email exists.
+- **Sessions** use a random 256-bit token in an `HttpOnly`, `SameSite=Lax` cookie that lasts 30 days. The database stores only a SHA-256 hash of the token, and logging out deletes it on the server.
+- **Cross-site requests** that change state are rejected by checking the `Origin` header.
+- **Login and register** are rate limited to 10 attempts per 15 minutes per IP.
+
 ## Features
 
 - [x] Client-side AES-256-GCM encryption, key in the URL fragment
@@ -93,19 +105,23 @@ A wrong password does not burn the note. After 5 wrong attempts, the note is des
 - [x] Dark / light theme
 - [x] "Notes destroyed" counter
 - [x] Strict security headers (CSP, no referrer, no framing), rate limiting
+- [x] Optional accounts: register, login, logout
+- [x] "Notlarım" page: see if your notes were read, delete unread ones
 
 ## Later
 
 - [ ] Multiple allowed views
-- [ ] Read receipts
+- [ ] Email notification when a note is read
+- [ ] Email verification and password reset
 - [ ] Encrypted file attachments
-- [ ] Accounts and a public inbox
+- [ ] Public inbox
 
 ## Project layout
 
 ```
 src/server.js       HTTP server, API, static files
-src/store.js        SQLite storage (node:sqlite)
+src/store.js        SQLite storage (node:sqlite): notes, users, sessions
+src/auth.js         Password hashing, session tokens, cookies
 public/             Pages, styles and browser code
 public/js/crypto.js All encryption (shared by browser and tests)
 test/               Tests (node:test)
@@ -115,10 +131,16 @@ test/               Tests (node:test)
 
 | Method | Path | Purpose |
 |---|---|---|
-| `POST` | `/api/notes` | Create a note: `{ ciphertext, expiresInDays, password?: { salt, auth } }` → `{ id }` |
+| `POST` | `/api/notes` | Create a note: `{ ciphertext, expiresInDays, password?: { salt, auth } }` → `{ id, tracked }` |
 | `GET` | `/api/notes/:id` | Check a note exists, without burning it → `{ hasPassword, salt, expiresAt }` |
 | `POST` | `/api/notes/:id/open` | Get the ciphertext and burn the note: `{ auth? }` → `{ ciphertext }` |
 | `GET` | `/api/stats` | `{ destroyed }` |
+| `POST` | `/api/auth/register` | `{ email, password }` → `{ user }` and a session cookie |
+| `POST` | `/api/auth/login` | `{ email, password }` → `{ user }` and a session cookie |
+| `POST` | `/api/auth/logout` | Ends the session |
+| `GET` | `/api/auth/me` | `{ user }`, or `{ user: null }` when signed out |
+| `GET` | `/api/my/notes` | Your notes' statuses (signed in) |
+| `DELETE` | `/api/my/notes/:id` | Delete one of your unread notes (signed in) |
 
 ## Security notes
 

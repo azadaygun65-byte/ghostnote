@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kayıt ol · Ghostnote</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/theme.js"></script>
+    <script type="module" src="/js/nav.js"></script>
+    <script type="module" src="/js/auth-page.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">👻</span> Ghostnote</a>
+      <nav>
+        <a class="nav-about" href="/about">Nasıl çalışır?</a>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Temayı değiştir">◐</button>
+      </nav>
+    </header>
+
+    <main class="container narrow">
+      <section class="card">
+        <h1>Hesap oluştur</h1>
+        <p class="muted">Gönderdiğin notların okunup okunmadığını takip et, okunmamış bir notu istediğin an sil.</p>
+
+        <form id="auth-form" data-mode="register" novalidate>
+          <div class="field">
+            <label for="auth-email" class="label">E-posta</label>
+            <input id="auth-email" type="email" autocomplete="email" placeholder="sen@ornek.com" required />
+          </div>
+          <div class="field">
+            <label for="auth-password" class="label">Şifre</label>
+            <input id="auth-password" type="password" autocomplete="new-password" minlength="8" required />
+            <div class="field-meta field-meta-left">En az 8 karakter</div>
+          </div>
+          <div class="field">
+            <label for="auth-password-confirm" class="label">Şifre (tekrar)</label>
+            <input id="auth-password-confirm" type="password" autocomplete="new-password" required />
+          </div>
+          <p id="auth-error" class="error" role="alert" hidden></p>
+          <button id="auth-submit" class="primary" type="submit">Kayıt ol</button>
+        </form>
+
+        <p class="auth-switch muted">Zaten hesabın var mı? <a id="auth-switch" href="/login">Giriş yap</a></p>
+      </section>
+      <p class="auth-note muted">
+        Notlarının içeriği ve linkleri hesabında saklanmaz. Sadece durumları (bekliyor, okundu, süresi doldu) görünür.
+      </p>
+    </main>
+  </body>
+</html>

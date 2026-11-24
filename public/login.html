@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Giriş yap · Ghostnote</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/theme.js"></script>
+    <script type="module" src="/js/nav.js"></script>
+    <script type="module" src="/js/auth-page.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">👻</span> Ghostnote</a>
+      <nav>
+        <a class="nav-about" href="/about">Nasıl çalışır?</a>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Temayı değiştir">◐</button>
+      </nav>
+    </header>
+
+    <main class="container narrow">
+      <section class="card">
+        <h1>Tekrar hoş geldin</h1>
+        <p class="muted">Giriş yap, gönderdiğin notların okunup okunmadığını gör.</p>
+
+        <form id="auth-form" data-mode="login" novalidate>
+          <div class="field">
+            <label for="auth-email" class="label">E-posta</label>
+            <input id="auth-email" type="email" autocomplete="email" placeholder="sen@ornek.com" required />
+          </div>
+          <div class="field">
+            <label for="auth-password" class="label">Şifre</label>
+            <input id="auth-password" type="password" autocomplete="current-password" required />
+          </div>
+          <p id="auth-error" class="error" role="alert" hidden></p>
+          <button id="auth-submit" class="primary" type="submit">Giriş yap</button>
+        </form>
+
+        <p class="auth-switch muted">Hesabın yok mu? <a id="auth-switch" href="/register">Kayıt ol</a></p>
+      </section>
+      <p class="auth-note muted">Not oluşturmak için hesap gerekmez. Hesap sadece notlarını takip etmek için.</p>
+    </main>
+  </body>
+</html>
