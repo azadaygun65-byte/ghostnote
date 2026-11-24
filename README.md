@@ -42,9 +42,25 @@ sequenceDiagram
     M->>M: Decrypt with KEY from the link
 ```
 
+## Example: tracking notes with an account
+
+Accounts are optional. Ayşe creates one because she wants to know when her notes are read.
+
+**6. Ayşe signs up** with her email and a password of at least 8 characters.
+
+![Sign up](docs/screenshots/06-kayit-ol.png)
+
+**7. She checks Notlarım (my notes).** Every note she creates while signed in shows up here with its status: waiting, read (and when), deleted by her, or destroyed after 5 wrong passwords. She can still delete a note nobody has opened. The page never shows a note's content or link, only its status.
+
+![My notes](docs/screenshots/07-notlarim.png)
+
+**8. Wrong passwords are rejected.** The error is the same whether the email exists or not, so nobody can find out who has an account, and login attempts are rate limited.
+
+![Wrong login](docs/screenshots/08-giris-hatali.png)
+
 It also works on phones, in light and dark themes:
 
-<img src="docs/screenshots/06-mobil-acik-tema.png" alt="Mobile, light theme" width="300">
+<img src="docs/screenshots/09-mobil-acik-tema.png" alt="Mobile, light theme" width="300">
 
 ## Run it
 
