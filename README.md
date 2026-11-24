@@ -1,5 +1,10 @@
 # Ghostnote 👻
 
+[![Tests](https://github.com/azadaygun65-byte/ghostnote/actions/workflows/test.yml/badge.svg)](https://github.com/azadaygun65-byte/ghostnote/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Node.js 22+](https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg)
+![Dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
+
 Self-destructing, end-to-end encrypted notes. Write a note, get a link, and the note is deleted the moment it is read.
 
 > Inspired by the idea behind burnernote.com. Written from scratch.
@@ -140,7 +145,7 @@ src/store.js        SQLite storage (node:sqlite): notes, users, sessions
 src/auth.js         Password hashing, session tokens, cookies
 public/             Pages, styles and browser code
 public/js/crypto.js All encryption (shared by browser and tests)
-test/               Tests (node:test)
+test/               Tests (node:test), run on every push by GitHub Actions
 ```
 
 ## API
@@ -165,4 +170,4 @@ test/               Tests (node:test)
 
 ## License
 
-To be decided.
+[MIT](LICENSE) © 2026 Azad Aygün

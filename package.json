@@ -2,6 +2,7 @@
   "name": "ghostnote",
   "version": "0.1.0",
   "description": "Self-destructing, end-to-end encrypted notes",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "engines": {
