@@ -4,8 +4,11 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Node.js 22+](https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg)
 ![Dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
+[![Live demo](https://img.shields.io/badge/live%20demo-online-8b5cf6.svg)](https://ghostnote-production-3c88978d.up.railway.app)
 
 Self-destructing, end-to-end encrypted notes. Write a note, get a link, and the note is deleted the moment it is read.
+
+**🔗 Try it live: [ghostnote-production-3c88978d.up.railway.app](https://ghostnote-production-3c88978d.up.railway.app)**
 
 > Inspired by the idea behind burnernote.com. Written from scratch.
 
@@ -85,6 +88,23 @@ Environment variables:
 | `DB_FILE` | `data/ghostnote.db` | SQLite database file |
 | `COOKIE_SECURE` | unset | Set to `1` in production (HTTPS) to mark the session cookie `Secure` |
 | `TRUST_PROXY` | `0` | Number of reverse proxies in front of the app (e.g. `1` on Railway), so rate limits use the visitor's real IP from `X-Forwarded-For` |
+
+## Deploy to Railway
+
+The live demo runs on [Railway](https://railway.com). Because notes and accounts live in a SQLite file, the app needs a persistent volume.
+
+1. **New Project → GitHub Repository** and pick this repo. Railway detects Node from `package.json` and `.nvmrc` and runs `npm start`.
+2. **Attach a volume** to the service with mount path `/data`.
+3. **Variables:**
+   ```
+   DB_FILE=/data/ghostnote.db
+   COOKIE_SECURE=1
+   TRUST_PROXY=1
+   ```
+   Railway sets `PORT` itself.
+4. **Settings → Networking → Generate Domain.** Railway serves it over HTTPS.
+
+Every push to `main` redeploys automatically; data on the volume survives redeploys.
 
 ## How it works
 
