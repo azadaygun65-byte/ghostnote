@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Sana bir not var · Ghostnote</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/theme.js"></script>
+    <script type="module" src="/js/read.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">👻</span> Ghostnote</a>
+      <nav>
+        <a href="/about">Nasıl çalışır?</a>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Temayı değiştir">◐</button>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div id="view-loading">
+          <p class="muted">Yükleniyor…</p>
+        </div>
+
+        <div id="view-confirm" hidden>
+          <h1>Sana bir not var 👻</h1>
+          <p class="muted">Bu not açıldıktan sonra <strong>kalıcı olarak silinecek</strong>. Bir daha göremezsin.</p>
+          <form id="confirm-form" novalidate>
+            <div id="password-field" class="field" hidden>
+              <label for="read-password" class="label">Bu not şifreli</label>
+              <input id="read-password" type="password" placeholder="Şifreyi gir" autocomplete="off" />
+            </div>
+            <p id="read-error" class="error" role="alert" hidden></p>
+            <button id="reveal-button" class="primary" type="submit">Notu göster</button>
+          </form>
+        </div>
+
+        <div id="view-note" hidden>
+          <h1>Not</h1>
+          <pre id="note-content" class="note-content"></pre>
+          <p class="warning">Bu not sunucudan silindi. Sayfayı kapatınca bir daha göremezsin.</p>
+          <div class="button-row">
+            <button id="copy-note" class="secondary" type="button">Metni kopyala</button>
+            <a class="primary as-button" href="/">Kendi notunu yaz</a>
+          </div>
+        </div>
+
+        <div id="view-gone" hidden>
+          <h1>Bu not artık yok 🔥</h1>
+          <p id="gone-message" class="muted">Ya daha önce okundu ya da süresi doldu. Notlar sadece bir kez açılabilir.</p>
+          <a class="primary as-button" href="/">Yeni not yaz</a>
+        </div>
+
+        <div id="view-invalid" hidden>
+          <h1>Link eksik görünüyor</h1>
+          <p class="muted">
+            Linkin <code>#</code> işaretinden sonraki kısmı eksik ya da bozuk. Notu açmak için bu kısım gerekli.
+            Linki gönderen kişiden tam halini iste. Not henüz silinmedi.
+          </p>
+          <a class="secondary as-button" href="/">Ana sayfa</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

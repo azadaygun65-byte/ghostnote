@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ghostnote · Okununca kaybolan şifreli notlar</title>
+    <meta
+      name="description"
+      content="Okunduğu anda kendini yok eden, tarayıcında şifrelenen notlar. Sunucu notunu asla okuyamaz."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/theme.js"></script>
+    <script type="module" src="/js/create.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">👻</span> Ghostnote</a>
+      <nav>
+        <a href="/about">Nasıl çalışır?</a>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Temayı değiştir">◐</button>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <h1>Okununca kaybolan notlar</h1>
+        <p class="lead">Tarayıcında şifrelenir. Sunucu notunu asla göremez. Takip yok.</p>
+      </section>
+
+      <section class="card">
+        <form id="create-form" novalidate>
+          <label for="note-text" class="label">Notun</label>
+          <textarea
+            id="note-text"
+            rows="7"
+            placeholder="Gizli mesajını buraya yaz…"
+            autocomplete="off"
+            spellcheck="false"
+            required
+          ></textarea>
+          <div class="field-meta"><span id="char-count">0 / 150.000</span> bayt</div>
+
+          <button id="advanced-toggle" class="link-button" type="button" aria-expanded="false" aria-controls="advanced-panel">
+            Gelişmiş seçenekler
+          </button>
+
+          <div id="advanced-panel" class="advanced" hidden>
+            <div class="field">
+              <label for="note-password" class="label">Şifre (isteğe bağlı)</label>
+              <input id="note-password" type="password" placeholder="Boş bırakabilirsin" autocomplete="new-password" />
+            </div>
+            <div class="field">
+              <label for="note-days" class="label">Okunmazsa kaç gün sonra silinsin?</label>
+              <select id="note-days">
+                <option value="1">1 gün</option>
+                <option value="3">3 gün</option>
+                <option value="7" selected>7 gün</option>
+                <option value="14">14 gün</option>
+                <option value="30">30 gün</option>
+              </select>
+            </div>
+          </div>
+
+          <p id="create-error" class="error" role="alert" hidden></p>
+          <button id="submit-button" class="primary" type="submit">Link oluştur</button>
+        </form>
+
+        <div id="result" class="result" hidden>
+          <h2>Link hazır 🔥</h2>
+          <p id="result-info" class="muted"></p>
+          <div class="copy-row">
+            <input id="result-link" type="text" readonly aria-label="Not linki" />
+            <button id="copy-button" class="primary" type="button">Kopyala</button>
+          </div>
+          <p class="warning">
+            Bu linki bir daha göremezsin. Linki açan herkes notu okuyabilir, o yüzden sadece istediğin kişiyle paylaş.
+          </p>
+          <button id="new-note-button" class="secondary" type="button">Yeni not yaz</button>
+        </div>
+      </section>
+
+      <p class="stats"><span class="dot" aria-hidden="true"></span> <span id="destroyed-count">0</span> not güvenle yok edildi</p>
+    </main>
+
+    <footer class="site-footer">
+      <a href="/about">Nasıl çalışır?</a>
+    </footer>
+  </body>
+</html>

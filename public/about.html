@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nasıl çalışır? · Ghostnote</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/theme.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">👻</span> Ghostnote</a>
+      <nav>
+        <a href="/">Not yaz</a>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Temayı değiştir">◐</button>
+      </nav>
+    </header>
+
+    <main class="container prose">
+      <h1>Nasıl çalışır?</h1>
+
+      <h2>Kısaca</h2>
+      <ul>
+        <li>Notun, cihazından çıkmadan önce tarayıcında şifrelenir.</li>
+        <li>Şifreyi çözen anahtar sunucumuza hiç gelmez.</li>
+        <li>Notunu biz bile okuyamayız.</li>
+        <li>Not okunduğu anda veritabanından kalıcı olarak silinir.</li>
+      </ul>
+
+      <h2>Not oluştururken</h2>
+      <ol>
+        <li>Tarayıcın, Web Crypto API ile rastgele 256 bitlik bir AES-GCM anahtarı üretir.</li>
+        <li>Notun bu anahtarla tarayıcında şifrelenir.</li>
+        <li>Sunucuya sadece şifreli hali gönderilir.</li>
+        <li>Anahtar, linkin <code>#</code> işaretinden sonraki kısmına konur.</li>
+      </ol>
+      <p>
+        Linkin <code>#</code> sonrasındaki kısmı tarayıcılar sunucuya asla göndermez (RFC 3986). Yani anahtar sadece
+        linkin içinde yaşar. Sunucumuz ele geçirilse bile elde edilebilecek tek şey, anahtar olmadan anlamsız olan
+        şifreli veridir.
+      </p>
+
+      <h2>Şifreli notlar</h2>
+      <p>
+        Nota şifre koyarsan, not bir kez daha şifrelenir. Şifren PBKDF2 (310.000 tur) ile iki ayrı değere dönüştürülür:
+        biri notu şifreler ve tarayıcından çıkmaz, diğeri sunucuya şifreyi bildiğini kanıtlar. Sunucu bu ikinci değerin
+        sadece özetini (scrypt) saklar. 5 yanlış denemeden sonra not güvenlik için yok edilir.
+      </p>
+
+      <h2>Silme</h2>
+      <p>
+        Not açıldığında, şifreli veri sana gönderilmeden önce veritabanından silinir. Arşiv ya da "çöp kutusu" yoktur.
+        Hiç açılmayan notlar, seçtiğin süre dolunca otomatik olarak silinir.
+      </p>
+
+      <h2>Sınırlar</h2>
+      <p>
+        Hiçbir tarayıcı tabanlı şifreleme; ele geçirilmiş bir cihazı, kötü niyetli tarayıcı eklentilerini ya da notu
+        açtıktan sonra metni kopyalayan birini engelleyemez. Linki sadece güvendiğin kanallardan paylaş. Şifre
+        kullanıyorsan, şifreyi linkten farklı bir yoldan ilet.
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <a href="/">Not yaz</a>
+    </footer>
+  </body>
+</html>
