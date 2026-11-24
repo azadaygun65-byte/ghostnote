@@ -62,7 +62,7 @@ Accounts are optional. Ayşe creates one because she wants to know when her note
 
 ![My notes](docs/screenshots/07-notlarim.png)
 
-**8. Wrong passwords are rejected.** The error is the same whether the email exists or not, so nobody can find out who has an account, and login attempts are rate limited.
+**8. Wrong passwords are rejected.** A failed login gives the same error, and takes the same time, whether the email has an account or not. Login attempts are rate limited.
 
 ![Wrong login](docs/screenshots/08-giris-hatali.png)
 
@@ -136,6 +136,7 @@ The account never stores a note's content, key or link: only its status and date
 - **Sessions** use a random 256-bit token in an `HttpOnly`, `SameSite=Lax` cookie that lasts 30 days. The database stores only a SHA-256 hash of the token, and logging out deletes it on the server.
 - **Cross-site requests** that change state are rejected by checking the `Origin` header.
 - **Login and register** are rate limited to 10 attempts per 15 minutes per IP.
+- **Known trade-off:** the sign-up form says when an email is already registered, so someone could check whether an email has an account. Hiding that properly needs email verification, which is on the list below.
 
 ## Features
 
@@ -187,7 +188,9 @@ test/               Tests (node:test), run on every push by GitHub Actions
 ## Security notes
 
 - Client-side encryption cannot protect against a compromised device, malicious browser extensions, or someone copying the text after it is decrypted.
-- Run behind HTTPS in production. The rate limiter uses the socket IP, so behind a reverse proxy it needs to read the forwarded client IP instead.
+- Run behind HTTPS in production and set `COOKIE_SECURE=1`.
+- Behind a reverse proxy, set `TRUST_PROXY` to the number of proxies so rate limits use each visitor's real IP. Never set it higher than the real number, or visitors could fake their IP to dodge the limits.
+- Rate limits live in memory, so they reset when the server restarts and are not shared between instances. That is fine for a single-instance demo.
 
 ## License
 
