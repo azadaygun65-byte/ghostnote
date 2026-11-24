@@ -154,12 +154,31 @@ export function createApp({
   rateLimit = { windowMs: 60_000, max: 30 },
   authRateLimit = { windowMs: 15 * 60_000, max: 10 },
   cookieSecure = process.env.COOKIE_SECURE === '1',
+  // How many reverse proxies (e.g. Railway's edge) sit in front of this server.
+  // 0 = trust nobody and use the socket address. Never set this higher than
+  // the real number of proxies, or clients could fake their IP.
+  trustProxy = Number(process.env.TRUST_PROXY ?? 0),
 } = {}) {
   const store = new NoteStore(dbFile, { now });
   const allowNotes = createRateLimiter(rateLimit, now);
   const allowAuth = createRateLimiter(authRateLimit, now);
 
-  const clientIp = (req) => req.socket.remoteAddress ?? 'unknown';
+  /**
+   * The visitor's IP, used for rate limiting. Behind a proxy every request
+   * comes from the proxy, so we read X-Forwarded-For instead. Each proxy
+   * appends the address it received the request from, so with N trusted
+   * proxies the real client is the Nth entry from the right. Anything to the
+   * left of it was written by the client and cannot be trusted.
+   */
+  function clientIp(req) {
+    const socketIp = req.socket.remoteAddress ?? 'unknown';
+    if (!(trustProxy > 0)) return socketIp;
+    const forwarded = String(req.headers['x-forwarded-for'] ?? '')
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+    return forwarded[forwarded.length - trustProxy] ?? socketIp;
+  }
 
   function checkRate(req) {
     if (!allowNotes(clientIp(req))) throw new HttpError(429, 'rate_limited');

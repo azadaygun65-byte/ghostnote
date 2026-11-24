@@ -84,6 +84,7 @@ Environment variables:
 | `PORT` | `3000` | HTTP port |
 | `DB_FILE` | `data/ghostnote.db` | SQLite database file |
 | `COOKIE_SECURE` | unset | Set to `1` in production (HTTPS) to mark the session cookie `Secure` |
+| `TRUST_PROXY` | `0` | Number of reverse proxies in front of the app (e.g. `1` on Railway), so rate limits use the visitor's real IP from `X-Forwarded-For` |
 
 ## How it works
 
